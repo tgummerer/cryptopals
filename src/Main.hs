@@ -4,4 +4,4 @@ import Numeric
 main :: IO ()
 main = do
   contents <- getContents
-  putStrLn $ show  $ fromHex contents
+  putStrLn $ toBase64  $ fromHex contents
