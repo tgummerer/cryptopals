@@ -1,5 +1,6 @@
 module UnlimitedBits
   ( fromHex
+  , hexXor
   , toHex
   , toBase64
   ) where
@@ -34,6 +35,12 @@ arrFromHex [] = []
 arrFromHex ('\n':[]) = []
 arrFromHex (_:[]) = error "Invalid input length"
 arrFromHex (x:y:xs) = ((fromIntegral (digitToInt x)) `B.shiftL` 4 + (fromIntegral (digitToInt y))):arrFromHex(xs)
+
+xor :: Bits -> Bits -> Bits
+xor (Bits a _) (Bits b _) = Bits (zipWith B.xor a b) 0
+
+hexXor :: String -> String -> String
+hexXor a b = toHex $ xor (fromHex a) (fromHex b)
 
 toHex :: Bits -> String
 toHex (Bits xs _) = foldr z  [] $ map fromIntegral xs
