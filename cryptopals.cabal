@@ -21,5 +21,7 @@ executable cryptopals
   -- other-extensions:    
   build-depends:       base >=4.9 && <4.10
                      , hspec
+                     , containers
+
   hs-source-dirs:      src
   default-language:    Haskell2010

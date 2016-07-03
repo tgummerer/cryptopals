@@ -1,5 +1,6 @@
 import Test.Hspec
 import UnlimitedBits
+import XorCrypt
 
 main :: IO ()
 main = hspec $ do
@@ -12,3 +13,6 @@ main = hspec $ do
       (toAsciiString $ fromHex "48656c6c6f20576f726c64") `shouldBe` "Hello World"
     it "xor two hex numbers" $ do
       hexXor "1c0111001f010100061a024b53535009181c" "686974207468652062756c6c277320657965" `shouldBe` "746865206b696420646f6e277420706c6179"
+  describe "Decrypt" $ do
+    it "decrypt hex encoded string" $ do
+      (fst $ decryptXor "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736") `shouldBe` "Cooking MC's like a pound of bacon"

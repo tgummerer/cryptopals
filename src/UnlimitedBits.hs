@@ -4,6 +4,7 @@ module UnlimitedBits
   , toHex
   , toBase64
   , toAsciiString
+  , xorWord
   ) where
 
 import Data.Char
@@ -44,7 +45,7 @@ hexXor :: String -> String -> String
 hexXor a b = toHex $ xor (fromHex a) (fromHex b)
 
 toHex :: Bits -> String
-toHex (Bits xs _) = foldr z  [] $ map fromIntegral xs
+toHex (Bits xs _) = foldr z [] $ map fromIntegral xs
   where
     z x rest = intToDigit (x `B.shiftR` 4):intToDigit (x B..&. 0x0f):rest
 
@@ -59,3 +60,6 @@ toBase64 bits = if containsBits bits then
 
 toAsciiString :: Bits -> String
 toAsciiString (Bits xs _) = map (chr . fromIntegral) xs
+
+xorWord :: Bits -> Word8 -> Bits
+xorWord (Bits xs _) mask = Bits (map (flip B.xor mask) xs) 0
