@@ -3,6 +3,7 @@ module UnlimitedBits
   , hexXor
   , toHex
   , toBase64
+  , toAsciiString
   ) where
 
 import Data.Char
@@ -55,3 +56,6 @@ toBase64 bits = if containsBits bits then
                   codes !! (fromIntegral $ B.shiftR (bits .&. 0xfc) 2):toBase64 (bits `shiftL` 6)
                 else
                   []
+
+toAsciiString :: Bits -> String
+toAsciiString (Bits xs _) = map (chr . fromIntegral) xs
