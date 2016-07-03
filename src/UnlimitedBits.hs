@@ -1,8 +1,10 @@
 module UnlimitedBits
   ( fromHex
+  , toHex
   , toBase64
   ) where
 
+import Data.Char
 import Data.Word
 import qualified Data.Bits as B
 import Unsafe.Coerce
@@ -27,18 +29,16 @@ shiftL :: Bits -> Int -> Bits
 shiftL (Bits [] _) _ = (Bits [] 0)
 shiftL (Bits xs off) by = (Bits (drop (quot (off + by) 8) xs) (mod (off + by) 8))
 
-hexval :: Char -> Word8
-hexval x
-  | x >= 'A' && x <= 'F' = (unsafeCoerce x) - 65 + 10
-  | x >= 'a' && x <= 'f' = (unsafeCoerce x) - 97 + 10
-  | x >= '0' && x <= '9' = (unsafeCoerce x) - 48
-  | otherwise = error "invalid hex character"
-
 arrFromHex :: String -> [Word8]
 arrFromHex [] = []
 arrFromHex ('\n':[]) = []
 arrFromHex (_:[]) = error "Invalid input length"
-arrFromHex (x:y:xs) = ((hexval x) `B.shiftL` 4 + hexval y):arrFromHex(xs)
+arrFromHex (x:y:xs) = ((fromIntegral (digitToInt x)) `B.shiftL` 4 + (fromIntegral (digitToInt y))):arrFromHex(xs)
+
+toHex :: Bits -> String
+toHex (Bits xs _) = foldr z  [] $ map fromIntegral xs
+  where
+    z x rest = intToDigit (x `B.shiftR` 4):intToDigit (x B..&. 0x0f):rest
 
 fromHex :: String -> Bits
 fromHex xs = Bits (arrFromHex xs) 0
