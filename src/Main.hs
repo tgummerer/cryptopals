@@ -16,3 +16,6 @@ main = hspec $ do
   describe "Decrypt" $ do
     it "decrypt hex encoded string" $ do
       (fst $ decryptXor "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736") `shouldBe` "Cooking MC's like a pound of bacon"
+    it "find xor encrypted string in bunch of hex strings" $ do
+      contents <- readFile "testdata/1.4.txt"
+      elem "Now that the party is jumping\n" (findXorEncrypted (lines contents)) `shouldBe` True

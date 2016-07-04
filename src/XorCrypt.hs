@@ -1,5 +1,6 @@
 module XorCrypt
   ( decryptXor
+  , findXorEncrypted
   ) where
   
 import UnlimitedBits
@@ -42,3 +43,6 @@ findClosestEnglishMatch xs = head $ L.sortBy (comparing $ snd) (map chi2 xs)
 
 decryptXor :: String -> (String, Double)
 decryptXor st = findClosestEnglishMatch $ map (toAsciiString . xorWord (fromHex st)) [0..255]
+
+findXorEncrypted :: [String] -> [String]
+findXorEncrypted = take 5 . map fst . L.sortBy (comparing $ snd) . map decryptXor
