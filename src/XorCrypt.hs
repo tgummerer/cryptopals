@@ -1,6 +1,7 @@
 module XorCrypt
   ( decryptXor
   , findXorEncrypted
+  , encryptXor
   ) where
   
 import UnlimitedBits
@@ -18,7 +19,6 @@ isScoringChar c = (ord c) >= 65 && (ord c) <= 90
 
 findFrequencies :: String -> M.Map Char Double
 findFrequencies xs = M.fromListWith (+) [(toLower c, 1) | c <- filter isScoringChar xs]
-  where
 
 -- Algorithm based on http://crypto.stackexchange.com/questions/30209/developing-algorithm-for-detecting-plain-text-via-frequency-analysis
 englishFreq :: [(Char, Double)]
@@ -42,7 +42,13 @@ findClosestEnglishMatch :: [String] -> (String, Double)
 findClosestEnglishMatch xs = head $ L.sortBy (comparing $ snd) (map chi2 xs)
 
 decryptXor :: String -> (String, Double)
-decryptXor st = findClosestEnglishMatch $ map (toAsciiString . xorWord (fromHex st)) [0..255]
+decryptXor st = findClosestEnglishMatch $ map (toAsciiString . xorWord (fromHex st)) (subLists [0..255])
+  where
+    subLists [] = []
+    subLists (x:xs) = [x]:subLists xs
 
 findXorEncrypted :: [String] -> [String]
 findXorEncrypted = take 5 . map fst . L.sortBy (comparing $ snd) . map decryptXor
+
+encryptXor :: String -> String -> String
+encryptXor st = toHex . xorWord (fromAsciiString st) . extractBits . fromAsciiString

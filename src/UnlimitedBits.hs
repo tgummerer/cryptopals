@@ -4,6 +4,8 @@ module UnlimitedBits
   , toHex
   , toBase64
   , toAsciiString
+  , fromAsciiString
+  , extractBits
   , xorWord
   ) where
 
@@ -61,5 +63,11 @@ toBase64 bits = if containsBits bits then
 toAsciiString :: Bits -> String
 toAsciiString (Bits xs _) = map (chr . fromIntegral) xs
 
-xorWord :: Bits -> Word8 -> Bits
-xorWord (Bits xs _) mask = Bits (map (flip B.xor mask) xs) 0
+fromAsciiString :: String -> Bits
+fromAsciiString xs = Bits (map (fromIntegral . ord) xs) 0
+
+extractBits :: Bits -> [Word8]
+extractBits (Bits xs _) = xs
+
+xorWord :: Bits -> [Word8] -> Bits
+xorWord (Bits xs _) mask = Bits (zipWith (B.xor) xs (concat $ repeat mask)) 0
