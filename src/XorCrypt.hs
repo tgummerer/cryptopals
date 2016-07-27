@@ -1,7 +1,8 @@
 module XorCrypt
   ( decryptXor
-  , findXorEncrypted
   , encryptXor
+  , findXorEncrypted
+  , hammingDistance
   ) where
   
 import UnlimitedBits
@@ -52,3 +53,6 @@ findXorEncrypted = take 5 . map fst . L.sortBy (comparing $ snd) . map decryptXo
 
 encryptXor :: String -> String -> String
 encryptXor st = toHex . xorWord (fromAsciiString st) . extractBits . fromAsciiString
+
+hammingDistance :: String -> String -> Int
+hammingDistance st1 st2 = nrSetBits $ xor (fromAsciiString st1) (fromAsciiString st2)

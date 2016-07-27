@@ -7,6 +7,9 @@ module UnlimitedBits
   , fromAsciiString
   , extractBits
   , xorWord
+  , xor
+  , nrSetBits
+  , fromBase64
   ) where
 
 import Data.Char
@@ -71,3 +74,14 @@ extractBits (Bits xs _) = xs
 
 xorWord :: Bits -> [Word8] -> Bits
 xorWord (Bits xs _) mask = Bits (zipWith (B.xor) xs (concat $ repeat mask)) 0
+
+nrSetBits :: Bits -> Int
+nrSetBits (Bits xs _) = foldr (\x acc -> acc + B.popCount x) 0 xs
+
+fromBase64' :: Int -> String -> [Word8]
+fromBase64' _ [] = []
+fromBase64' off (x:xs)
+  | off == 0 = 
+  
+fromBase64 :: String -> Bits
+fromBase64 xs = Bits (fromBase64' 0 xs) 0
