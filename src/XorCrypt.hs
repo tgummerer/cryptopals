@@ -52,7 +52,7 @@ findXorEncrypted :: [String] -> [String]
 findXorEncrypted = take 5 . map fst . L.sortBy (comparing $ snd) . map decryptXor
 
 encryptXor :: String -> String -> String
-encryptXor st = toHex . xorWord (fromAsciiString st) . extractBits . fromAsciiString
+encryptXor st = toHex . xorWord (fromAsciiString st) . fromAsciiString
 
 hammingDistance :: String -> String -> Int
 hammingDistance st1 st2 = nrSetBits $ xor (fromAsciiString st1) (fromAsciiString st2)

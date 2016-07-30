@@ -5,7 +5,6 @@ module UnlimitedBits
   , toBase64
   , toAsciiString
   , fromAsciiString
-  , extractBits
   , xorWord
   , xor
   , nrSetBits
@@ -17,30 +16,26 @@ import qualified Data.Bits as B
 import Unsafe.Coerce
 import Numeric
 
-data Bits = Bits [Word8] Int deriving (Show)
-
 codes :: String
 codes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 
-arrFromHex :: String -> [Word8]
-arrFromHex [] = []
-arrFromHex ('\n':[]) = []
-arrFromHex (_:[]) = error "Invalid input length"
-arrFromHex (x:y:xs) = ((fromIntegral (digitToInt x)) `B.shiftL` 4 + (fromIntegral (digitToInt y))):arrFromHex(xs)
-
-xor :: Bits -> Bits -> Bits
-xor (Bits a _) (Bits b _) = Bits (zipWith B.xor a b) 0
+xor :: [Word8] -> [Word8] -> [Word8]
+xor = zipWith B.xor
 
 hexXor :: String -> String -> String
-hexXor a b = toHex $ xor (fromHex a) (fromHex b)
+hexXor xs ys = toHex $ xor (fromHex xs) (fromHex ys)
 
-toHex :: Bits -> String
-toHex (Bits xs _) = foldr z [] $ map fromIntegral xs
+toHex :: [Word8] -> String
+toHex xs = foldr z [] $ map fromIntegral xs
   where
     z x rest = intToDigit (x `B.shiftR` 4):intToDigit (x B..&. 0x0f):rest
 
-fromHex :: String -> Bits
-fromHex xs = Bits (arrFromHex xs) 0
+fromHex :: String -> [Word8]
+fromHex [] = []
+fromHex ('\n':[]) = []
+fromHex (_:[]) = error "Invalid input length"
+fromHex (x:y:xs) = ((fromIntegral (digitToInt x)) `B.shiftL` 4 + (fromIntegral (digitToInt y))):fromHex(xs)
+
 
 toBase64' :: [Word8] -> String
 toBase64' xs =
@@ -53,24 +48,18 @@ toBase64' xs =
     b = if length xs < 2 then 0 else xs !! 1
     c = if length xs < 3 then 0 else xs !! 2
 
-toBase64'' :: [Word8] -> String
-toBase64'' [] = []
-toBase64'' xs = toBase64' (take 3 xs) ++ toBase64'' (drop 3 xs)
+toBase64 :: [Word8] -> String
+toBase64 [] = []
+toBase64 xs = toBase64' (take 3 xs) ++ toBase64 (drop 3 xs)
 
-toBase64 :: Bits -> String
-toBase64 (Bits xs _) = toBase64'' xs
+toAsciiString :: [Word8] -> String
+toAsciiString = map (chr . fromIntegral)
 
-toAsciiString :: Bits -> String
-toAsciiString (Bits xs _) = map (chr . fromIntegral) xs
+fromAsciiString :: String -> [Word8]
+fromAsciiString xs = map (fromIntegral . ord) xs
 
-fromAsciiString :: String -> Bits
-fromAsciiString xs = Bits (map (fromIntegral . ord) xs) 0
+xorWord :: [Word8] -> [Word8] -> [Word8]
+xorWord xs mask = zipWith (B.xor) xs (concat $ repeat mask)
 
-extractBits :: Bits -> [Word8]
-extractBits (Bits xs _) = xs
-
-xorWord :: Bits -> [Word8] -> Bits
-xorWord (Bits xs _) mask = Bits (zipWith (B.xor) xs (concat $ repeat mask)) 0
-
-nrSetBits :: Bits -> Int
-nrSetBits (Bits xs _) = foldr (\x acc -> acc + B.popCount x) 0 xs
+nrSetBits :: [Word8] -> Int
+nrSetBits xs = foldr (\x acc -> acc + B.popCount x) 0 xs
