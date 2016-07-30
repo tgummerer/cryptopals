@@ -3,6 +3,7 @@ module UnlimitedBits
   , hexXor
   , toHex
   , toBase64
+  , fromBase64
   , toAsciiString
   , fromAsciiString
   , xorWord
@@ -12,6 +13,7 @@ module UnlimitedBits
 
 import Data.Char
 import Data.Word
+import qualified Data.List as L
 import qualified Data.Bits as B
 import Unsafe.Coerce
 import Numeric
@@ -63,3 +65,17 @@ xorWord xs mask = zipWith (B.xor) xs (concat $ repeat mask)
 
 nrSetBits :: [Word8] -> Int
 nrSetBits = foldr (\x acc -> acc + B.popCount x) 0
+
+fromBase64 :: String -> [Word8]
+fromBase64 [] = []
+fromBase64 (a:b:c:d:xs) = if c == '=' then x:(fromBase64 xs)
+                          else if d == '=' then x:y:(fromBase64 xs)
+                          else x:y:z:(fromBase64 xs)
+  where
+    x = ((B.shiftL (index a) 2) B..|. (B.shiftR (index b) 4))
+    y = ((B.shiftL (index b) 4) B..|. (B.shiftR (index c) 2))
+    z = ((B.shiftL (index c) 6) B..|. (index d))
+    index x = fromIntegral $ extract $ L.elemIndex x codes
+    extract (Just x) = x
+    extract Nothing = error "invalid base64 encoding"
+fromBase64 _ = error "invalid base64 encoding"
