@@ -12,11 +12,11 @@ import qualified Data.List as L
 import qualified Data.Map as M
 
 isValidChar :: Char -> Bool
-isValidChar c = c == '\n' || (ord c) > 31 && (ord c) < 127
+isValidChar c = c == '\n' || ord c > 31 && ord c < 127
 
 isScoringChar :: Char -> Bool
-isScoringChar c = (ord c) >= 65 && (ord c) <= 90
-                  || (ord c) >= 97 && (ord c) <= 122
+isScoringChar c = ord c >= 65 && ord c <= 90
+                  || ord c >= 97 && ord c <= 122
 
 findFrequencies :: String -> M.Map Char Double
 findFrequencies xs = M.fromListWith (+) [(toLower c, 1) | c <- filter isScoringChar xs]
@@ -31,25 +31,23 @@ englishFreq = zip ['a'..'z'] [ 0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02
 chi2 :: String -> (String, Double)
 chi2 st = (st, computeChi2 st)
   where
-    computeChi2 st = if (length $ filter isValidChar st) == length st then
+    computeChi2 st = if length (filter isValidChar st) == length st then
                        foldr f 0.0 englishFreq
                      else
                        1000.0
-    f (char, freq) acc = acc + ((freq * (fromIntegral len) - M.findWithDefault 0.0 char frequencies) ** 2) / (freq * (fromIntegral len))
+    f (char, freq) acc = acc + ((freq * fromIntegral len - M.findWithDefault 0.0 char frequencies) ** 2) / (freq * fromIntegral len)
     frequencies = findFrequencies st
     len = length $ filter isScoringChar st
 
 findClosestEnglishMatch :: [String] -> (String, Double)
-findClosestEnglishMatch = head . L.sortBy (comparing $ snd) . map chi2
+findClosestEnglishMatch = L.minimumBy (comparing snd) . map chi2
 
 decryptXor :: String -> (String, Double)
 decryptXor st = findClosestEnglishMatch $ map (toAsciiString . xorWord (fromHex st)) (subLists [0..255])
-  where
-    subLists [] = []
-    subLists (x:xs) = [x]:subLists xs
+  where subLists = map (: [])
 
 findXorEncrypted :: [String] -> [String]
-findXorEncrypted = take 5 . map fst . L.sortBy (comparing $ snd) . map decryptXor
+findXorEncrypted = take 5 . map fst . L.sortBy (comparing snd) . map decryptXor
 
 encryptXor :: String -> String -> String
 encryptXor st = toHex . xorWord (fromAsciiString st) . fromAsciiString
