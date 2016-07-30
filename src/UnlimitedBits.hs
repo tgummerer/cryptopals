@@ -22,20 +22,6 @@ data Bits = Bits [Word8] Int deriving (Show)
 codes :: String
 codes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 
-containsBits :: Bits -> Bool
-containsBits (Bits xs _) = not $ null xs
-
-(.&.) :: Bits -> Word8 -> Word8
-(Bits [] _) .&. _ = 0
-(Bits (x:[]) off) .&. mask = (x `B.shiftL` off) B..&. mask
-(Bits (x:y:_) off) .&. mask = val B..&.mask
-  where
-    val = (x `B.shiftL` off) + (y `B.shiftR` (8 - off))
-
-shiftL :: Bits -> Int -> Bits
-shiftL (Bits [] _) _ = (Bits [] 0)
-shiftL (Bits xs off) by = (Bits (drop (quot (off + by) 8) xs) (mod (off + by) 8))
-
 arrFromHex :: String -> [Word8]
 arrFromHex [] = []
 arrFromHex ('\n':[]) = []
@@ -56,11 +42,23 @@ toHex (Bits xs _) = foldr z [] $ map fromIntegral xs
 fromHex :: String -> Bits
 fromHex xs = Bits (arrFromHex xs) 0
 
+toBase64' :: [Word8] -> String
+toBase64' xs =
+  codes !! (fromIntegral ((B.shiftR a 2) B..&. 0x3f)):
+  codes !! (fromIntegral (((B.shiftL a 4) B..|. (B.shiftR b 4)) B..&. 0x3f)):
+  (if length xs < 2 then '=' else codes !! (fromIntegral (((B.shiftL b 2) B..|. (B.shiftR c 6)) B..&. 0x3f))):
+  (if length xs < 3 then '=' else codes !! (fromIntegral (c B..&. 0x3f))):[]
+  where
+    a = xs !! 0
+    b = if length xs < 2 then 0 else xs !! 1
+    c = if length xs < 3 then 0 else xs !! 2
+
+toBase64'' :: [Word8] -> String
+toBase64'' [] = []
+toBase64'' xs = toBase64' (take 3 xs) ++ toBase64'' (drop 3 xs)
+
 toBase64 :: Bits -> String
-toBase64 bits = if containsBits bits then
-                  codes !! (fromIntegral $ B.shiftR (bits .&. 0xfc) 2):toBase64 (bits `shiftL` 6)
-                else
-                  []
+toBase64 (Bits xs _) = toBase64'' xs
 
 toAsciiString :: Bits -> String
 toAsciiString (Bits xs _) = map (chr . fromIntegral) xs
