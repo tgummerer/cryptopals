@@ -34,13 +34,13 @@ chi2 st = (st, computeChi2 st)
     computeChi2 st = if (length $ filter isValidChar st) == length st then
                        foldr f 0.0 englishFreq
                      else
-                       100000000.0
+                       1000.0
     f (char, freq) acc = acc + ((freq * (fromIntegral len) - M.findWithDefault 0.0 char frequencies) ** 2) / (freq * (fromIntegral len))
     frequencies = findFrequencies st
     len = length $ filter isScoringChar st
 
 findClosestEnglishMatch :: [String] -> (String, Double)
-findClosestEnglishMatch xs = head $ L.sortBy (comparing $ snd) (map chi2 xs)
+findClosestEnglishMatch = head . L.sortBy (comparing $ snd) . map chi2
 
 decryptXor :: String -> (String, Double)
 decryptXor st = findClosestEnglishMatch $ map (toAsciiString . xorWord (fromHex st)) (subLists [0..255])

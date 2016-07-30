@@ -26,7 +26,7 @@ hexXor :: String -> String -> String
 hexXor xs ys = toHex $ xor (fromHex xs) (fromHex ys)
 
 toHex :: [Word8] -> String
-toHex xs = foldr z [] $ map fromIntegral xs
+toHex = foldr z [] . map fromIntegral
   where
     z x rest = intToDigit (x `B.shiftR` 4):intToDigit (x B..&. 0x0f):rest
 
@@ -56,10 +56,10 @@ toAsciiString :: [Word8] -> String
 toAsciiString = map (chr . fromIntegral)
 
 fromAsciiString :: String -> [Word8]
-fromAsciiString xs = map (fromIntegral . ord) xs
+fromAsciiString = map (fromIntegral . ord)
 
 xorWord :: [Word8] -> [Word8] -> [Word8]
 xorWord xs mask = zipWith (B.xor) xs (concat $ repeat mask)
 
 nrSetBits :: [Word8] -> Int
-nrSetBits xs = foldr (\x acc -> acc + B.popCount x) 0 xs
+nrSetBits = foldr (\x acc -> acc + B.popCount x) 0
