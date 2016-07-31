@@ -1,7 +1,9 @@
 import Test.Hspec
+import AesCrypt
 import UnlimitedBits
 import XorCrypt
 import Data.Char (isSpace)
+import qualified Data.ByteString.Char8 as BC
 
 main :: IO ()
 main = hspec $ do
@@ -18,6 +20,7 @@ main = hspec $ do
       toHex (fromBase64 "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t") `shouldBe` "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
     it "hamming distance" $
       hammingDistance (fromAsciiString "this is a test") (fromAsciiString "wokka wokka!!!") `shouldBe` 37
+
   describe "Decrypt" $ do
     it "decrypt hex encoded string" $
       fst (decryptXor "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736") `shouldBe` "Cooking MC's like a pound of bacon"
@@ -29,3 +32,8 @@ main = hspec $ do
     it "break repeating key xor" $ do
       contents <- readFile "testdata/1.6.txt"
       head (lines $ breakRepeatingKeyXor (fromBase64 $ filter (/= '\n') contents)) `shouldBe` "I'm back and I'm ringin' the bell "
+
+  describe "Aes" $ do
+    it "decrypt AES encoded string" $ do
+      contents <- readFile "testdata/1.7.txt"
+      head (lines $ BC.unpack $ decryptAesEcb (fromBase64 $ filter (/= '\n') contents) "YELLOW SUBMARINE") `shouldBe` "I'm back and I'm ringin' the bell "
