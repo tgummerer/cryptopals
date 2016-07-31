@@ -2,11 +2,13 @@ module XorCrypt
   ( decryptXor
   , encryptXor
   , findXorEncrypted
+  , breakRepeatingKeyXor
   ) where
   
 import UnlimitedBits
 import Data.Char
 import Data.Ord
+import Data.Word
 import qualified Data.List as L
 import qualified Data.Map as M
 
@@ -50,3 +52,19 @@ findXorEncrypted = take 5 . map fst . L.sortBy (comparing snd) . map decryptXor
 
 encryptXor :: String -> String -> String
 encryptXor st = toHex . xorWord (fromAsciiString st) . fromAsciiString
+
+findNormalizedDistance :: [Word8] -> Int -> Double
+findNormalizedDistance [] _ = 0
+findNormalizedDistance xs size = fromIntegral (hammingDistance (take size xs) (take size $ drop size xs))
+  + findNormalizedDistance (drop size xs) size
+
+findLikelyKeySize :: Int -> [Word8] -> Int
+findLikelyKeySize max st = snd $ L.minimumBy (comparing fst) $ zip (map (findNormalizedDistance st) [2..max]) [2..max]
+
+every :: Int -> [Word8] -> [Word8]
+every n [] = []
+every n (x:xs) = x:every n (drop (n - 1) xs)
+
+breakRepeatingKeyXor :: [Word8] -> String
+breakRepeatingKeyXor xs = L.concat $ L.transpose $ map (fst . decryptXor . toHex) $ L.take n $ map (every n) $ iterate tail xs
+  where n = findLikelyKeySize 40 xs
