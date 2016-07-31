@@ -9,6 +9,7 @@ module UnlimitedBits
   , xorWord
   , xor
   , nrSetBits
+  , hammingDistance
   ) where
 
 import Data.Char
@@ -79,3 +80,6 @@ fromBase64 (a:b:c:d:xs)
         extract (Just x) = x
         extract Nothing = error "invalid base64 encoding"
 fromBase64 _ = error "invalid base64 encoding"
+
+hammingDistance :: [Word8] -> [Word8] -> Int
+hammingDistance st1 st2 = nrSetBits $ xor st1 st2
