@@ -37,3 +37,6 @@ main = hspec $ do
     it "decrypt AES encoded string" $ do
       contents <- readFile "testdata/1.7.txt"
       head (lines $ BC.unpack $ decryptAesEcb (fromBase64 $ filter (/= '\n') contents) "YELLOW SUBMARINE") `shouldBe` "I'm back and I'm ringin' the bell "
+    it "detect AES in ECB mode" $ do
+      contents <- readFile "testdata/1.8.txt"
+      take 10 (detectAesEcb $ lines contents) `shouldBe` "d880619740"
