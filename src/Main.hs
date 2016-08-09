@@ -40,3 +40,5 @@ main = hspec $ do
     it "(solution 1.8) detect AES in ECB mode" $ do
       contents <- readFile "testdata/1.8.txt"
       take 10 (detectAesEcb $ lines contents) `shouldBe` "d880619740"
+    it "(solution 2.1) add pkcs#7 padding" $
+      toAsciiString (pkcs7Padding $ fromAsciiString "YELLOW SUBMARINE") `shouldBe` "YELLOW SUBMARINE\x04\x04\x04\x04"

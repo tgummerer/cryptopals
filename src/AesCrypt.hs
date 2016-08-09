@@ -1,6 +1,7 @@
 module AesCrypt
   ( decryptAesEcb
   , detectAesEcb
+  , pkcs7Padding
   ) where
 
 import qualified Data.ByteString as B
@@ -26,3 +27,9 @@ numSameBits xs = foldr (\(x,y) acc -> acc + matches16bits x y xs) 0 (pairs xs)
 
 detectAesEcb :: [String] -> String
 detectAesEcb xs = snd $ maximumBy (comparing fst) (zip (map (numSameBits . fromHex) xs) xs)
+
+pkcs7Padding' :: Int -> [Word8]
+pkcs7Padding' n = take n $ repeat $ fromIntegral n
+
+pkcs7Padding :: [Word8] -> [Word8]
+pkcs7Padding xs = xs ++ pkcs7Padding' (5 - length xs `mod` 5)
