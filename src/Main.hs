@@ -3,7 +3,11 @@ import AesCrypt
 import UnlimitedBits
 import XorCrypt
 import Data.Char (isSpace)
+import Data.Word
 import qualified Data.ByteString.Char8 as BC
+import C21
+import C22
+import C23
 
 main :: IO ()
 main = hspec $ do
@@ -40,5 +44,15 @@ main = hspec $ do
     it "(solution 1.8) detect AES in ECB mode" $ do
       contents <- readFile "testdata/1.8.txt"
       take 10 (detectAesEcb $ lines contents) `shouldBe` "d880619740"
+
+  describe "2.1" $ do
     it "(solution 2.1) add pkcs#7 padding" $
       toAsciiString (pkcs7Padding $ fromAsciiString "YELLOW SUBMARINE") `shouldBe` "YELLOW SUBMARINE\x04\x04\x04\x04"
+    it "(solution 2.2) decrypt cbc" $ do
+      contents <- readFile "testdata/2.2.txt"
+      head (lines $ toAsciiString (decryptAesCbc [0 :: Word8,0..] (fromBase64 $ filter (/= '\n') contents) "YELLOW SUBMARINE")) `shouldBe` "I'm back and I'm ringin' the bell "
+    it "(solution 2.3) encryption oracle" $ do
+      contents <- readFile "testdata/1.7.txt"
+      let text = BC.unpack $ decryptAesEcb (fromBase64 $ filter (/= '\n') contents) "YELLOW SUBMARINE"
+      (st, algo) <- encryptRandom $ fromAsciiString text
+      encryptionOracle st `shouldBe` algo
