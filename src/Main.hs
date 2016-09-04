@@ -52,7 +52,5 @@ main = hspec $ do
       contents <- readFile "testdata/2.2.txt"
       head (lines $ toAsciiString (decryptAesCbc [0 :: Word8,0..] (fromBase64 $ filter (/= '\n') contents) "YELLOW SUBMARINE")) `shouldBe` "I'm back and I'm ringin' the bell "
     it "(solution 2.3) encryption oracle" $ do
-      contents <- readFile "testdata/1.7.txt"
-      let text = BC.unpack $ decryptAesEcb (fromBase64 $ filter (/= '\n') contents) "YELLOW SUBMARINE"
-      (st, algo) <- encryptRandom $ fromAsciiString text
+      (st, algo) <- encryptRandom $ fromAsciiString $ replicate 1024 '0'
       encryptionOracle st `shouldBe` algo

@@ -24,6 +24,7 @@ executable cryptopals
                      , containers
                      , cipher-aes
                      , bytestring
+                     , random
 
   hs-source-dirs:      src
   default-language:    Haskell2010
