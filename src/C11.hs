@@ -1,6 +1,8 @@
-module C23
+module C11
   ( encryptRandom
   , encryptionOracle
+  , encryptAesEcb
+  , isAesEcb
   ) where
 
 import qualified Data.Bits as Bits

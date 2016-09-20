@@ -5,9 +5,13 @@ import XorCrypt
 import Data.Char (isSpace)
 import Data.Word
 import qualified Data.ByteString.Char8 as BC
-import C21
-import C22
-import C23
+import C09
+import C10
+import C11
+import qualified C12 as C12
+import qualified C13 as C13
+import qualified C14 as C14
+import qualified C15 as C15
 
 main :: IO ()
 main = hspec $ do
@@ -46,11 +50,25 @@ main = hspec $ do
       take 10 (detectAesEcb $ lines contents) `shouldBe` "d880619740"
 
   describe "2.1" $ do
-    it "(solution 2.1) add pkcs#7 padding" $
-      toAsciiString (pkcs7Padding $ fromAsciiString "YELLOW SUBMARINE") `shouldBe` "YELLOW SUBMARINE\x04\x04\x04\x04"
-    it "(solution 2.2) decrypt cbc" $ do
+    it "(solution 2.09) add pkcs#7 padding" $
+      toAsciiString (pkcs7Padding (fromAsciiString "YELLOW SUBMARINE") 20) `shouldBe` "YELLOW SUBMARINE\x04\x04\x04\x04"
+    it "(solution 2.10) decrypt cbc" $ do
       contents <- readFile "testdata/2.2.txt"
       head (lines $ toAsciiString (decryptAesCbc [0 :: Word8,0..] (fromBase64 $ filter (/= '\n') contents) "YELLOW SUBMARINE")) `shouldBe` "I'm back and I'm ringin' the bell "
-    it "(solution 2.3) encryption oracle" $ do
+    it "(solution 2.11) encryption oracle" $ do
       (st, algo) <- encryptRandom $ fromAsciiString $ replicate 1024 '0'
       encryptionOracle st `shouldBe` algo
+    it "(solution 2.12) decrypt ecb" $ do
+      C12.findBlockLength `shouldBe` 16
+      C12.functionUsingEcb `shouldBe` True
+      C12.breakOne (replicate 15 0) 0 0 `shouldBe` 82
+      C12.breakOne ((replicate 14 0) ++ [82]) 1 0 `shouldBe` 111
+      take 16 C12.decryptAesEcb `shouldBe` "Rollin' in my 5."
+    it "(solution 2.13) ecb cut-and-paste" $ do
+      take 37 (C13.decrypt C13.createAdminProfile) `shouldBe` "email=1@example.com&uid=10&role=admin"
+    it "(solution 2.14) decrypt ecb hard" $ do
+      C14.findExtraLength `shouldBe` 11
+      take 16 C14.decryptAesEcb `shouldBe` "Rollin' in my 5."
+    it "(solution 2.15) pkcs7PaddingChecker" $ do
+      C15.hasPkcs7Padding "ICE ICE BABY\x04\x04\x04\x04" `shouldBe` ("ICE ICE BABY", True)
+      C15.hasPkcs7Padding "ICE ICE BABY\x01\x02\x03\x04" `shouldBe` ("", False)
