@@ -1,0 +1,4 @@
+package cryptopals
+
+func test() {
+}
