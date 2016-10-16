@@ -13,7 +13,8 @@ go_binary(
     ],
     deps = [
         "//challenge_21:go_default_library",
-	"//challenge_22:go_default_library"
+	"//challenge_22:go_default_library",
+	"//challenge_23:go_default_library"
     ]
 )
 

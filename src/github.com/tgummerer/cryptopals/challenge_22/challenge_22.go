@@ -10,14 +10,14 @@ func CrackRngSeed() (uint32, uint32) {
 
 	rng.Init(uint32(time.Now().Unix()))
 
-	time.Sleep(time.Duration(rng.ExtractU32() % 30) * time.Second)
+	time.Sleep(time.Duration(rng.ExtractU32()%30) * time.Second)
 
 	rngSeed := uint32(time.Now().Unix())
 	rng.Init(rngSeed)
 
 	extracted := rng.ExtractU32()
-	
-	time.Sleep(time.Duration(rng.ExtractU32() % 30) * time.Second)
+
+	time.Sleep(time.Duration(rng.ExtractU32()%30) * time.Second)
 
 	for i := uint32(time.Now().Unix()) - 2000; i < uint32(time.Now().Unix()); i++ {
 		rng.Init(i)
@@ -26,6 +26,6 @@ func CrackRngSeed() (uint32, uint32) {
 			return rngSeed, i
 		}
 	}
-	
+
 	return rngSeed, 0
 }
